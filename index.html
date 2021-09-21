@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" class="darkMl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search wikipedia</title>
+    
+</head>
+<body>
+  <style>
+  
+    .non-dark {
+      filter: invert(1) hue-rotate(180deg);
+    }
+
+
+    .darkMl::-webkit-scrollbar {
+      display: block;
+      background-color: black;
+      width: 0.8vw;
+    }
+    
+    .darkMl::-webkit-scrollbar-thumb {
+      background-color: rgb(75, 30, 117);
+      
+    }
+    .darkMl::-webkit-scrollbar-thumb:hover {
+      background-color: rgb(103, 26, 175);
+      
+    }
+
+  
+    
+    ::-webkit-scrollbar-track:hover {
+      background-color: rgb(49, 49, 49);
+    }
+
+    
+
+
+
+
+    body {
+      background-color: black;
+      color: red;
+    
+    }
+    input {
+      border-radius: 25px;
+      border: 2px solid rgb(11, 214, 221);
+      padding: 20px;
+      /*margin: 1vw;*/ 
+      width: 200px;
+      height: 15px;
+      background-color: rgb(36, 36, 36);
+      color: aqua;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      word-spacing: 1px;
+     
+    }
+    input:focus{
+      background-color: rgb(128, 128, 128);
+      outline: none;
+
+    }
+
+    .resDiv > div {
+      background-color: rgb(14, 13, 13);
+      border: 2px solid rgb(112, 7, 165);
+      color: yellow;
+      border-radius: 1em;
+      text-align: center;
+      position: relative;
+      padding: 5px;
+    }
+    .resDiv div p {
+      border: 0px;
+      margin: 0px;
+      padding:1px;
+    }
+    .resDiv div h4 {
+      border:1px;
+      margin: 1px;
+      padding: 1px;
+    }
+    .resDiv {
+      position: relative;
+    }
+    
+
+    .viewChg{
+      display: flex;                  /*it centers text inside button*/
+      justify-content: center;            /* y-axis*/
+      flex: 30 200px;
+
+    }
+
+    .inp-btn {
+      display: flex;
+      
+    }
+    
+    #dark-button {
+      /*border: 1px solid black;*/
+      padding: 2px;
+      border-radius: 50%;
+      flex: 0 20px;
+      background-color: azure;
+      height: 20px;
+      width:  20px;
+      color: black;
+      text-align: center;
+    
+    }
+
+    #dark-button:hover {
+     background-color: aqua;
+     cursor: pointer; 
+    }
+
+    #fancy {
+      /*position: relative;
+      left: 47vw;*/
+      margin: 1em;
+      border-radius: 12px;
+      border: 2px solid rgb(17, 211, 211);
+      padding: 15px 10px; 
+      width: 80px;
+      height: 15px;
+      background-color:rgb(70, 10, 148);
+      color:aquamarine;
+      display: flex;                  
+      align-items: center;            
+      justify-content: center;        
+
+    }
+
+    #fancy:hover {
+      background-color:rgb(84, 36, 148);
+      color:rgb(189, 255, 127);
+      cursor: pointer;
+    }
+
+    .info {
+      /*position: relative;
+      left: 43vw;*/
+      color: rgb(241, 176, 101);
+      display: flex;                  
+      align-items: center;            
+      justify-content: center;        
+    }
+
+    .bigUrl {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      left: 0px;
+      top: 0px;
+    }
+    .smallP {
+      position:relative;
+      height: 0px;
+      margin: 0px;
+      padding:2px;
+    }
+    
+    .errorDiv {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 0px;
+      background-color: black;
+    }
+    
+    .errorP{
+     /* position: relative;
+      left: 19em;
+      top: 2em;
+      */
+      color: red;
+      font-size: 30px;
+      font-family: Arial;
+    }
+  </style>
+  
+  
+<section class="inp-btn">
+
+<div class="viewChg">
+  <input  id="sbox" class="D-ignore" type='text' placeholder="Type what to search for"  spellcheck="false" autocomplete="off" required>
+</div>
+<div id="dark-button" >D</div>
+</section>
+
+<div class="viewChg">
+  <br><button id="fancy" class="D-ignore" onclick='fancyS(document.querySelector("#sbox").value)'>Search</button> 
+</div>
+<div><p class="info">use the box above to search wikipedia</p></div>
+<div class="resDiv"></div>  
+
+
+
+
+
+
+<script defer>  // apparently defer does nothing. error if script not placed after #sbox and #fancy elements
+  
+  let sboxJs = document.getElementById('sbox');
+      sboxJs.addEventListener("keyup", (e)=>{ if(e.keyCode === 13 && sboxJs.matches('#sbox:focus')){
+        //console.log("should be working");
+        sboxJs.blur();  
+        document.querySelector('#fancy').click();
+      }});
+  
+  
+  function fancyS(sTerm){
+    
+    let pageids = "";
+    let fullUrls = [];
+    var srList;
+    var divi;
+    let resultDiv = document.querySelector('.resDiv');
+        while(resultDiv.lastChild){
+          resultDiv.removeChild(resultDiv.lastChild);
+        }
+    fetch("https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch="+sTerm+
+      "&format=json")
+    .then(response=>{
+      return response.json();})
+    .then(response=>{
+      //console.log(response);                          //debug for no results
+      if(response.query.searchinfo.totalhits == 0){
+        let errorDiv =document.createElement('div');
+
+        let errorMessage = document.createElement('p');
+        errorMessage.textContent= "Wikipedia has no matching pages";
+        
+        errorMessage.setAttribute("class","errorP"); 
+        errorDiv.appendChild(errorMessage);
+
+        if(response.query.searchinfo.suggestion) {
+        let suggestSearch = document.createElement('p');
+        suggestSearch.textContent = `You may be looking for "${response.query.searchinfo.suggestion}".`;
+        suggestSearch.setAttribute("class","errorP");
+        errorDiv.appendChild(suggestSearch);
+        }
+        errorDiv.setAttribute('class', 'errorDiv');
+        resultDiv.appendChild(errorDiv);
+
+        return new Promise((resolve,reject)=>{reject('no results')});             //returns a rejected promise so thst code execution jumps to catch block which does nothing.
+      }
+
+
+
+      srList= response.query.search;
+        
+      for(let i=0 ; i<srList.length-1 ; i++) {
+        pageids+= srList[i].pageid + "|" ;            //add pageids separated by | except the last one .
+      }
+        pageids+= srList[srList.length-1].pageid;     // add last pageid
+    })
+    .then(dummy=>{
+      fetch("https://en.wikipedia.org/w/api.php?origin=*&action=query&pageids="+pageids+"&prop=info&inprop=url&format=json")
+      .then(urlResult=> { return urlResult.json();})
+      .then(result=>{
+        //console.log(result);                          //debug for no matches
+        for(let i=0; i<srList.length; i++){
+          fullUrls.push(result.query.pages[""+srList[i].pageid].fullurl);
+        }
+        
+      })
+      .then(dummy=> {
+        
+        for(let i=0; i< srList.length; i++){
+          
+          let aResult = document.createElement("div");
+          resultDiv.appendChild(aResult);
+  
+          let aHeader = document.createElement('h4');
+          aHeader.textContent = srList[i].title;
+  
+          let aTimeStamp = document.createElement('p');
+          aTimeStamp.textContent= `Last Modified: ${srList[i].timestamp}`;
+  
+          let aUrl = document.createElement('a');
+          aUrl.setAttribute("class", "bigUrl");
+          aUrl.setAttribute("target", "_blank");
+          aUrl.setAttribute("href", fullUrls[i]);
+          
+          let aSnippet = document.createElement('p');
+          aSnippet.textContent = srList[i].snippet.replace(/<span class="searchmatch">|<\/span>/ig, ""); // possible error
+          
+          let aSpace = document.createElement('p');
+          aSpace.setAttribute("class", "smallP");
+          
+          let divi = document.querySelectorAll('.resDiv > div');               // could cause problems.
+          divi[i].appendChild(aTimeStamp);
+          divi[i].appendChild(aHeader);
+          divi[i].appendChild(aSnippet);
+          divi[i].appendChild(aUrl);
+          resultDiv.appendChild(aSpace);
+          
+        }
+      });
+      })
+      .catch(error=>{});
+      
+  }
+
+  const chngMode = function() {
+    document.documentElement.classList.toggle('non-dark');                    //document.documentElement is the <html></html> element
+    document.documentElement.classList.toggle('darkMl');                      // this is meant to style the scrollbar in dark mode.
+    document.querySelectorAll('.D-ignore').forEach((selelement)=> {
+      selelement.classList.toggle('non-dark');                                //when the filter gets applied to both html (before this) and individual elements , it effectively chasges color twice hence has initial color.
+    })
+    if(document.documentElement.className == "non-dark"){
+      dMode.textContent = "L";
+    } else {dMode.textContent = "D";}
+  }
+let dMode = document.querySelector('#dark-button');
+dMode.addEventListener('click', chngMode);
+
+
+// Instead of doing all this we could add dark-mode class to all elements and have it in separate css file. the event handler would just select array of elements and toggle classes for each.  
+
+//or just toggle ".dark-mode" class for html, and the stylesheet would be written for ".dark-mode element" css selectors for every element style.
+
+</script>
+
+
+ 
+
+</body>
+
+</html>
